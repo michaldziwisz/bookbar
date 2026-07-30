@@ -6,7 +6,8 @@
 
 // --- Okno glowne sterowania ---
 IDD_MAIN DIALOGEX 0, 0, 260, 286
-STYLE DS_SETFONT | WS_CHILD
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Bookbar"
 FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Algorytm:", IDC_ALGO_CAPTION, 8, 8, 60, 10

@@ -340,6 +340,7 @@ INT_PTR CALLBACK MainProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
     case WM_INITDIALOG: {
         g_dlg = h;
+        SetWindowTextW(h, T(S_MAIN_CAPTION));   // tytul okna (dwujezyczny, z ogonkami)
         fillAlgoCombo(h);
         CheckDlgButton(h, IDC_ENABLED, g_params.enabled.load() ? BST_CHECKED : BST_UNCHECKED);
         setTextW(h, IDC_ENABLED, T(S_ENABLED));

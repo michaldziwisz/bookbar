@@ -18,5 +18,9 @@ where 7z >nul 2>&1 || set SZ="C:\Program Files\7-Zip\7z.exe"
 %SZ% x -y -osdk %SDKVER%.7z
 if errorlevel 1 (echo EXTRACT_FAILED & exit /b 1)
 
+REM Ustaw docelowa wersje API na 81 (foobar2000 v2.0+). SDK domyslnie ma 80
+REM (v1.5/1.6), przez co foobar v2.x odrzuca komponent x64. Przelaczamy w naglowku.
+powershell -Command "$f='sdk\foobar2000\SDK\foobar2000-versions.h'; (Get-Content $f) -replace '^#define FOOBAR2000_TARGET_VERSION 80','// #define FOOBAR2000_TARGET_VERSION 80' -replace '^// #define FOOBAR2000_TARGET_VERSION 81','#define FOOBAR2000_TARGET_VERSION 81' | Set-Content $f"
+
 echo SDK_OK
 endlocal

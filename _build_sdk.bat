@@ -1,5 +1,6 @@
 @echo off
-REM Buduje biblioteki foobar2000 SDK: pfc, foobar2000_SDK, shared (x64 Release, /MT).
+REM Buduje biblioteki foobar2000 SDK: pfc, foobar2000_SDK, shared (x64 Release, /MD).
+REM FOOBAR2000_TARGET_VERSION=81 -> komponent dla foobara 2.0+ (inaczej v2.x go odrzuca).
 setlocal
 set VS=C:\Program Files\Microsoft Visual Studio\2022\Community
 set MSB="%VS%\MSBuild\Current\Bin\MSBuild.exe"

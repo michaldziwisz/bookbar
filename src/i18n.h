@@ -15,7 +15,7 @@ enum StrId {
     S_QUICKSEEK, S_AAFILTER, S_AALEN_CAP, S_SEQ_CAP, S_SEEK_CAP, S_OVL_CAP,
     S_HOP_CAP, S_DEFAULTS_BTN, S_ADV_CAPTION,
     S_PITCH_ZERO, S_PITCH_SEMI, S_PITCH_CENTS,
-    S_SHORTCUTS,
+    S_SHORTCUTS, S_MAIN_CAPTION,
     STR_COUNT
 };
 
@@ -52,6 +52,7 @@ static const wchar_t* const kStrPL[STR_COUNT] = {
     /*S_PITCH_SEMI*/   L"%+d p\u00F3\u0142tonu (%+d cent\u00F3w)",
     /*S_PITCH_CENTS*/  L"%+d cent\u00F3w",
     /*S_SHORTCUTS*/    L"Skr\u00F3ty klawiszowe (-, =, Shift, Ctrl+Shift)",
+    /*S_MAIN_CAPTION*/ L"Bookbar \u2013 tempo, wysoko\u015B\u0107, wzbogacanie",
 };
 
 static const wchar_t* const kStrEN[STR_COUNT] = {
@@ -87,6 +88,7 @@ static const wchar_t* const kStrEN[STR_COUNT] = {
     /*S_PITCH_SEMI*/   L"%+d semitones (%+d cents)",
     /*S_PITCH_CENTS*/  L"%+d cents",
     /*S_SHORTCUTS*/    L"Keyboard shortcuts (-, =, Shift, Ctrl+Shift)",
+    /*S_MAIN_CAPTION*/ L"Bookbar \u2013 tempo, pitch, enhancement",
 };
 
 // true = polski interfejs. Ustawiane raz (jezyk UI Windows = polski).

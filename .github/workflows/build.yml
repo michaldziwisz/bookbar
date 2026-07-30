@@ -33,6 +33,17 @@ jobs:
           7z x -y -osdk "%SDKVER%.7z"
           if not exist sdk\foobar2000\SDK\dsp.h (echo SDK_MISSING & exit /b 1)
 
+      # SDK domyslnie celuje w API 80 (foobar 1.5/1.6); foobar v2.x odrzuca komponent
+      # x64 z target 80. Przelaczamy naglowek na 81 (foobar2000 v2.0+).
+      - name: Set SDK target to foobar2000 v2 (API 81)
+        shell: pwsh
+        run: |
+          $f = 'sdk/foobar2000/SDK/foobar2000-versions.h'
+          (Get-Content $f) `
+            -replace '^#define FOOBAR2000_TARGET_VERSION 80', '// #define FOOBAR2000_TARGET_VERSION 80' `
+            -replace '^// #define FOOBAR2000_TARGET_VERSION 81', '#define FOOBAR2000_TARGET_VERSION 81' `
+            | Set-Content $f
+
       # Buduje biblioteki SDK (pfc, shared, SDK) przez msbuild, x64 /MD.
       - name: Build foobar2000 SDK libs (x64, /MD)
         shell: cmd
