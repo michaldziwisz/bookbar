@@ -1,0 +1,6 @@
+[submodule "third_party/soundtouch"]
+	path = third_party/soundtouch
+	url = https://codeberg.org/soundtouch/soundtouch.git
+[submodule "third_party/bungee"]
+	path = third_party/bungee
+	url = https://github.com/bungee-audio-stretch/bungee.git

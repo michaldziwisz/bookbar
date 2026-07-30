@@ -1,0 +1,81 @@
+// bookbar.rc — zasoby GUI (natywne dialogi Win32). Ogonki jako \x-escape w kodzie,
+// tu etykiety bez diakrytyk w .rc dla pewnosci kodowania; realne polskie napisy
+// (z ogonkami) ustawiane sa dynamicznie w kodzie przez SetWindowTextW (Unicode).
+#include <windows.h>
+#include "resource.h"
+
+// --- Okno glowne sterowania ---
+IDD_MAIN DIALOGEX 0, 0, 260, 286
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "Algorytm:", IDC_ALGO_CAPTION, 8, 8, 60, 10
+    COMBOBOX        IDC_ALGO, 70, 6, 130, 80, CBS_DROPDOWNLIST | WS_TABSTOP | WS_VSCROLL
+    AUTOCHECKBOX    "Wlacz Bookbar", IDC_ENABLED, 8, 26, 120, 12, WS_TABSTOP
+
+    LTEXT           "Tempo:", IDC_TEMPO_CAPTION, 8, 46, 60, 10
+    CONTROL         "", IDC_TEMPO_SLIDER, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 58, 180, 20
+    LTEXT           "1,00x", IDC_TEMPO_LABEL, 196, 60, 56, 10
+
+    LTEXT           "Wysokosc:", IDC_PITCH_CAPTION, 8, 86, 60, 10
+    CONTROL         "", IDC_PITCH_SLIDER, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 98, 180, 20
+    LTEXT           "0", IDC_PITCH_LABEL, 196, 100, 56, 10
+
+    LTEXT           "Rate (kaseta):", IDC_RATE_CAPTION, 8, 126, 60, 10
+    CONTROL         "", IDC_RATE_SLIDER, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 138, 180, 20
+    LTEXT           "1,00x", IDC_RATE_LABEL, 196, 140, 56, 10
+
+    LTEXT           "Wyrownywanie glosnosci:", IDC_ENH_LOUD_CAP, 8, 166, 110, 10
+    CONTROL         "", IDC_ENH_LOUD, "msctls_trackbar32", TBS_HORZ | TBS_AUTOTICKS | WS_TABSTOP, 8, 176, 120, 20
+    LTEXT           "Wylaczone", IDC_ENH_LOUD_LBL, 134, 178, 118, 10
+
+    LTEXT           "Czytelnosc:", IDC_ENH_CLAR_CAP, 8, 200, 110, 10
+    CONTROL         "", IDC_ENH_CLAR, "msctls_trackbar32", TBS_HORZ | TBS_AUTOTICKS | WS_TABSTOP, 8, 210, 120, 20
+    LTEXT           "Wylaczone", IDC_ENH_CLAR_LBL, 134, 212, 118, 10
+
+    AUTOCHECKBOX    "Skroty klawiszowe (-, =, Shift, Ctrl+Shift)", IDC_SHORTCUTS, 8, 234, 244, 12, WS_TABSTOP
+
+    PUSHBUTTON      "Reset (Shift+Backspace)", IDC_RESET, 8, 250, 110, 14, WS_TABSTOP
+    PUSHBUTTON      "Parametry zaawansowane...", IDC_ADVANCED_BTN, 128, 250, 120, 14, WS_TABSTOP
+
+    DEFPUSHBUTTON   "OK", IDOK, 128, 268, 58, 14, WS_TABSTOP
+    PUSHBUTTON      "Anuluj", IDCANCEL, 190, 268, 58, 14, WS_TABSTOP
+END
+
+// --- Okno parametrow zaawansowanych (sekcja zalezna od algorytmu) ---
+IDD_ADVANCED DIALOGEX 0, 0, 300, 250
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Bookbar - parametry zaawansowane"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "", IDC_ADV_INFO, 8, 6, 284, 10
+
+    // ---- Sekcja SoundTouch ----
+    AUTOCHECKBOX    "QuickSeek (szybciej, nizsza jakosc)", IDC_ADV_QUICKSEEK, 8, 22, 200, 12, WS_TABSTOP
+    AUTOCHECKBOX    "Filtr antyaliasingowy", IDC_ADV_AAFILTER, 8, 38, 200, 12, WS_TABSTOP
+
+    LTEXT           "Dlugosc filtra AA:", IDC_ADV_AALEN_CAP, 8, 56, 110, 10
+    CONTROL         "", IDC_ADV_AALEN, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 66, 200, 18
+    LTEXT           "", IDC_ADV_AALEN_LBL, 214, 68, 80, 10
+
+    LTEXT           "Sekwencja (ms):", IDC_ADV_SEQ_CAP, 8, 88, 110, 10
+    CONTROL         "", IDC_ADV_SEQUENCE, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 98, 200, 18
+    LTEXT           "", IDC_ADV_SEQ_LABEL, 214, 100, 80, 10
+
+    LTEXT           "Okno wyszukiwania (ms):", IDC_ADV_SEEK_CAP, 8, 120, 130, 10
+    CONTROL         "", IDC_ADV_SEEKWIN, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 130, 200, 18
+    LTEXT           "", IDC_ADV_SEEK_LBL, 214, 132, 80, 10
+
+    LTEXT           "Nalozenie/overlap (ms):", IDC_ADV_OVL_CAP, 8, 152, 130, 10
+    CONTROL         "", IDC_ADV_OVERLAP, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 162, 200, 18
+    LTEXT           "", IDC_ADV_OVL_LBL, 214, 164, 80, 10
+
+    // ---- Sekcja Bungee ----
+    LTEXT           "Ziarnistosc (hop, 0=najlepsza jakosc):", IDC_ADV_HOP_CAP, 8, 56, 180, 10
+    CONTROL         "", IDC_ADV_HOP, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP, 8, 66, 200, 18
+    LTEXT           "", IDC_ADV_HOP_LBL, 214, 68, 80, 10
+
+    DEFPUSHBUTTON   "OK", IDOK, 120, 224, 50, 14, WS_TABSTOP
+    PUSHBUTTON      "Domyslne", IDC_ADV_DEFAULTS, 176, 224, 60, 14, WS_TABSTOP
+    PUSHBUTTON      "Anuluj", IDCANCEL, 240, 224, 50, 14, WS_TABSTOP
+END

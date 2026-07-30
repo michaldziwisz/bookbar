@@ -1,0 +1,36 @@
+# === Artefakty buildu (budowane w CI / lokalnie, nigdy commitowane) ===
+build/
+*.obj
+*.exp
+*.lib
+*.dll
+*.res
+*.exe
+*.pdb
+*.log
+
+# Biblioteki third-party budowane lokalnie (submoduly; build w CI/u siebie)
+third_party/*/build_x86/
+third_party/*/build_x64/
+
+# === foobar2000 SDK (pobierane skryptem fetch_sdk, NIE commitowane) ===
+# Licencja SDK zabrania redystrybucji pod nazwa autora; pobiera sie ze zrodla.
+sdk/
+
+# Archiwum SDK (pobierane skryptem, nie commitowane)
+SDK-*.7z
+
+# === Robocze pliki analiz i raporty wewnetrzne ===
+RAPORT_*.md
+PROGRESS_*.md
+
+# === Materialy testowe audio (duze; nie do repo) ===
+*.wav
+*.flac
+*.mp3
+*.f32
+
+# Backup / smieci edytorow
+*.bak
+*.bak_*
+*~

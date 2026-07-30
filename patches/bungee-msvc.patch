@@ -1,0 +1,45 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2a0af39..0774a33 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,7 +58,12 @@ add_library(pffft EXCLUDE_FROM_ALL STATIC
+   submodules/pffft/pffft.c
+   submodules/pffft/fftpack.c
+ )
+-target_compile_options(pffft PRIVATE -ffast-math -fno-finite-math-only -fno-exceptions)
++# Bookamp: guard GNU/Clang flags; MSVC uses /fp:fast (kod C PFFFT nie uzywa wyjatkow)
++target_compile_options(pffft PRIVATE
++  $<$<CXX_COMPILER_ID:GNU,Clang>:-ffast-math -fno-finite-math-only -fno-exceptions>
++  $<$<CXX_COMPILER_ID:MSVC>:/fp:fast>)
++# Bookamp: MSVC nie definiuje M_PI bez _USE_MATH_DEFINES (GCC/Clang robia to domyslnie)
++target_compile_definitions(pffft PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_USE_MATH_DEFINES>)
+ 
+ # Installation
+ if (BUNGEE_BUILD_SHARED_LIBRARY)
+diff --git a/src/Resample.h b/src/Resample.h
+index 2d40eb9..04a8c62 100644
+--- a/src/Resample.h
++++ b/src/Resample.h
+@@ -10,6 +10,13 @@
+ 
+ #include <Eigen/Core>
+ 
++// Bookamp: przenosny noinline (GCC/Clang vs MSVC)
++#if defined(_MSC_VER)
++#	define BUNGEE_NOINLINE __declspec(noinline)
++#else
++#	define BUNGEE_NOINLINE __attribute__((noinline))
++#endif
++
+ namespace Bungee::Resample {
+ 
+ // To resample from external buffer at input sample rate to internal buffer at (Fourier transformed) sample rate
+@@ -158,7 +165,7 @@ template <class Interpolation, class Mode>
+ struct Loop
+ {
+ 	template <bool ratioIsConstant>
+-	static __attribute__((noinline)) void run(RatioState<ratioIsConstant> &ratioState, Internal &internal, External external) // const & ext
++	static BUNGEE_NOINLINE void run(RatioState<ratioIsConstant> &ratioState, Internal &internal, External external) // const & ext
+ 	{
+ 		const Assert::FloatingPointExceptions floatingPointExceptions(FE_INEXACT | FE_UNDERFLOW);
+ 

@@ -1,0 +1,122 @@
+name: Build Bookbar (foobar2000 DSP, Windows x64)
+
+# Dwa sposoby uruchomienia:
+#  1. Recznie (Actions -> "Run workflow") -> komponent jako artefakt (wymaga logowania).
+#  2. Push tagu wersji (np. v1.0.0) -> GitHub buduje ORAZ publikuje publiczny Release.
+#     Zasoby Release hostuje GitHub; pobiera je kazdy bez logowania.
+
+"on":
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write   # potrzebne do utworzenia Release
+
+env:
+  SDKVER: SDK-2025-03-07
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Check out sources (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch foobar2000 SDK
+        shell: cmd
+        run: |
+          curl -L -o "%SDKVER%.7z" "https://www.foobar2000.org/downloads/%SDKVER%.7z"
+          7z x -y -osdk "%SDKVER%.7z"
+          if not exist sdk\foobar2000\SDK\dsp.h (echo SDK_MISSING & exit /b 1)
+
+      # Buduje biblioteki SDK (pfc, shared, SDK) przez msbuild, x64 /MD.
+      - name: Build foobar2000 SDK libs (x64, /MD)
+        shell: cmd
+        run: |
+          set MSB=msbuild
+          for %%P in (pfc\pfc.vcxproj foobar2000\shared\shared.vcxproj foobar2000\SDK\foobar2000_SDK.vcxproj) do (
+            msbuild sdk\%%P /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m /nologo /v:m
+            if errorlevel 1 exit /b 1
+          )
+
+      - name: Build SoundTouch (static, x64, /MD)
+        shell: cmd
+        run: |
+          cmake -S third_party\soundtouch -B third_party\soundtouch\build_x64 -G "Visual Studio 17 2022" -A x64 -T v143 ^
+            -DBUILD_SHARED_LIBS=OFF -DINTEGER_SAMPLES=OFF -DSOUNDSTRETCH=OFF -DSOUNDTOUCH_DLL=OFF ^
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL -DCMAKE_POLICY_DEFAULT_CMP0091=NEW
+          cmake --build third_party\soundtouch\build_x64 --config Release -j
+
+      - name: Patch Bungee for MSVC
+        shell: cmd
+        run: |
+          cd third_party\bungee
+          git apply --verbose ..\..\patches\bungee-msvc.patch
+
+      - name: Build Bungee (static, x64, /MD)
+        shell: cmd
+        run: |
+          cmake -S third_party\bungee -B third_party\bungee\build_x64 -G "Visual Studio 17 2022" -A x64 -T v143 ^
+            -DBUNGEE_BUILD_SHARED_LIBRARY=OFF ^
+            -DCMAKE_C_FLAGS="/DWIN32 /D_WINDOWS /D_USE_MATH_DEFINES" ^
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL -DCMAKE_POLICY_DEFAULT_CMP0091=NEW
+          cmake --build third_party\bungee\build_x64 --config Release --target bungee_library -j
+
+      # Gole cl/rc/link potrzebuja srodowiska x64.
+      - name: Add MSVC (x64) to PATH
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build component (foo_bookbar.dll)
+        shell: cmd
+        run: |
+          if not exist build mkdir build
+          set SDK=sdk
+          set ST=third_party\soundtouch
+          set BG=third_party\bungee
+          set STLIB=%ST%\build_x64\Release\SoundTouch.lib
+          set BGLIB=%BG%\build_x64\Release\bungee.lib %BG%\build_x64\Release\pffft.lib
+          set SDKLIB=%SDK%\foobar2000\SDK\x64\Release\foobar2000_SDK.lib %SDK%\foobar2000\shared\x64\Release\shared.lib %SDK%\pfc\x64\Release\pfc.lib
+          rc /nologo /fo build\bookbar.res src\bookbar.rc
+          cl /nologo /LD /O2 /MD /EHsc /std:c++20 /D_USE_MATH_DEFINES /DUNICODE /D_UNICODE ^
+            /I%SDK% /I%SDK%\foobar2000 /Isrc /I%ST%\include /I%BG% /I%BG%\submodules\eigen ^
+            src\main.cpp src\dsp_bookbar.cpp src\foobar_glue.cpp ^
+            %SDK%\foobar2000\foobar2000_component_client\component_client.cpp ^
+            src\processor.cpp src\gui.cpp src\shortcuts.cpp src\enhance.cpp ^
+            src\engine_soundtouch.cpp src\engine_bungee.cpp src\engine_factory.cpp ^
+            build\bookbar.res ^
+            /Fe:build\foo_bookbar.dll /Fo:build\ ^
+            /link %STLIB% %BGLIB% %SDKLIB% ^
+            user32.lib gdi32.lib comctl32.lib comdlg32.lib ole32.lib oleaut32.lib oleacc.lib uuid.lib shlwapi.lib shell32.lib advapi32.lib
+          dir build\foo_bookbar.dll
+
+      # Komponent foobara dystrybuuje sie jako .fb2k-component (zip z DLL w srodku).
+      - name: Package .fb2k-component
+        shell: cmd
+        run: |
+          cd build
+          7z a -tzip foo_bookbar.fb2k-component foo_bookbar.dll
+          cd ..
+          dir build\foo_bookbar.fb2k-component
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bookbar-x64
+          path: |
+            build/foo_bookbar.dll
+            build/foo_bookbar.fb2k-component
+
+      - name: Publish Release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/foo_bookbar.dll
+            build/foo_bookbar.fb2k-component
+          generate_release_notes: true
