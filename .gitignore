@@ -13,6 +13,15 @@ build/
 third_party/*/build_x86/
 third_party/*/build_x64/
 
+# Katalogi buildu komponentu (x64 domyslny + x86) i spakowany pakiet
+build_x86/
+build_x64/
+dist/
+*.fb2k-component
+
+# Pobrane narzedzia (instalatory foobara itp.) — nie do repo
+tools/
+
 # === foobar2000 SDK (pobierane skryptem fetch_sdk, NIE commitowane) ===
 # Licencja SDK zabrania redystrybucji pod nazwa autora; pobiera sie ze zrodla.
 sdk/

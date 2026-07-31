@@ -3,7 +3,7 @@
 // port wtyczki Winamp "Bookamp". C++/SDK foobar2000, x64. Licencja: GPLv3.
 #include <SDK/foobar2000.h>
 
-#define BOOKBAR_VERSION "1.0.0"
+#define BOOKBAR_VERSION "1.1.0"
 
 DECLARE_COMPONENT_VERSION(
     "Bookbar",
